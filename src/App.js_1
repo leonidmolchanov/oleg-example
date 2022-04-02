@@ -1,0 +1,76 @@
+import './App.css';
+import {useEffect, useState} from "react";
+
+
+
+const  App = () => {
+
+    const [rates, setRates] = useState();
+    const [desc, setDesc] = useState("Получения значени курса...")
+    const getData = async ()=>{
+        setDesc('Ожидание....')
+        const res = await fetch("https://www.cbr-xml-daily.ru/latest.js")
+        const json = await res.json()
+        setRates(Object.entries(json.rates))
+        setDesc('Ответ получен...')
+        console.log('save in state',json.rates)
+    }
+
+    const getRate = (currency)=>{
+        if(rates) {
+            setDesc(`Ваш курс ${currency} ${rates.find(e=>e[0]===currency)[1]}`)
+        }
+    }
+
+    const filterRates = ()=>{
+
+        setRates(rates.filter(e=>e[1]>=1))
+
+    }
+
+    useEffect(()=>{
+        setTimeout(()=> getData(), 2000)
+    },[])
+
+    useEffect(()=>{
+       console.log('Массив изменен')
+    },[rates])
+
+
+  return (
+    <div className="App">
+
+            <button
+                onClick={getData}
+            >Get Rates</button>
+<br />
+        <br />
+        <button
+            onClick={()=>getRate('USD')}
+        >Получить значение валюты USD</button>
+        <br/>
+        <button
+            onClick={()=>getRate('EUR')}
+        >Получить значение валюты EUR</button>
+        <br/>
+        <button
+            onClick={()=>filterRates()}
+        >Отфильтровать валюту</button>
+
+        <p>{desc}</p>
+        {
+            rates &&
+            rates.map((e)=>{
+                return (
+                    <div>
+                        <p>{`Валюта ${e[0]}, курс- ${e[1]}`}</p>
+                    </div>
+                )
+            })
+        }
+
+    </div>
+  );
+}
+
+export default App;
